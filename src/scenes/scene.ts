@@ -6,15 +6,15 @@ export class Scene extends PHASER.Scene {
         key: 'scene'
     }
 
-    private gameOver: boolean;
-    private camera;  // TODO: Zeus will fix this in the future
-    private keyboard;
-    private shoot;
-    private player;
-    private playerHasBall;
-    private ball;
+    private gameOver?: boolean;
+    private camera: any;  // TODO: Zeus will fix this in the future
+    private keyboard: any;
+    private shoot: any;
+    private player: any;
+    private playerHasBall: any;
+    private ball: any;
     private velocity = 0.01;
-    private debugText;
+    private debugText: any;
     private dat = new DAT.GUI({name: 'Soccer debug GUI'});
 
     constructor() {
@@ -121,7 +121,7 @@ export class Scene extends PHASER.Scene {
      * @param time - Overall time in ms since game started.
      * @param delta - Time in ms since last update call.
      */
-    public update(time, delta) {
+    public update(_time: number, _delta: number) {
         this.player.setVelocity(0);
         const velocity = 300;
 
@@ -172,7 +172,8 @@ export class Scene extends PHASER.Scene {
         this.createVectorGui(folderBall, 'velocity', this.ball.body.velocity, -600, 600, 10);
     }
 
-    createVectorGui(folder, name, vector, min, max, step){
+    createVectorGui(folder: dat.GUI, name: string, vector: PHASER.Math.Vector2, 
+                    min: number, max: number, step: number){
         const subFolder = folder.addFolder(name);
         subFolder.add(vector, 'x', min, max, step);
         subFolder.add(vector, 'y', min, max, step);
