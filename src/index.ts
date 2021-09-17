@@ -3,7 +3,7 @@ import { Scene } from './scenes/scene';
 
 export class Game extends PHASER.Game {
   private static GAME_CONFIG: Phaser.Types.Core.GameConfig = {
-    title: 'Put Game title here',
+    title: 'Phaser Soccer',
     type: PHASER.AUTO,
     scale: {
       width: window.innerWidth,
@@ -12,7 +12,8 @@ export class Game extends PHASER.Game {
     physics: {
       default: 'arcade',
       arcade: {
-          gravity: { y: 300 }
+          gravity: {},
+          debug: true
       }
     },
     backgroundColor: '#000000',
