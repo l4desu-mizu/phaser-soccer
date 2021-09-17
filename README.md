@@ -1,4 +1,8 @@
-# Application Skeleton for Phaser3 based 2D Game development
+# Phaser Soccer
+
+## Description
+
+A lame bad ass soccer game written in Typescript.
 
 ## Setup
 
