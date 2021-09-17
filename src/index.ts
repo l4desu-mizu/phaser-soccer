@@ -6,6 +6,7 @@ export class Game extends PHASER.Game {
     title: 'Phaser Soccer',
     type: PHASER.AUTO,
     scale: {
+      mode: Phaser.Scale.RESIZE,
       width: window.innerWidth,
       height: window.innerHeight
     },
