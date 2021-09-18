@@ -15,14 +15,16 @@ export class Scene extends PHASER.Scene {
 
 	private camera!: PHASER.Cameras.Scene2D.Camera;
 	private keyboard!: PHASER.Types.Input.Keyboard.CursorKeys;
-	private shoot: any;
+	private keyShoot!: PHASER.Input.Keyboard.Key;
 	private player1!: PHASER.Types.Physics.Arcade.SpriteWithDynamicBody;
 	private player2!: PHASER.Types.Physics.Arcade.SpriteWithDynamicBody;
-	private playerHasBall = false;
+	private playerHasBall1 = false;
+	private playerHasBall2 = false;
 	private ball!: PHASER.Types.Physics.Arcade.SpriteWithDynamicBody;
 	private debugText: PHASER.GameObjects.Text | null = null;
 	private dat = new DAT.GUI({ name: "Soccer debug GUI" });
-	private playerBallOverlap?: PHASER.Physics.Arcade.Collider;
+	private playerBallOverlap1?: PHASER.Physics.Arcade.Collider;
+	private playerBallOverlap2?: PHASER.Physics.Arcade.Collider;
 
 	constructor() {
 		super(Scene.CONFIG);
@@ -61,9 +63,12 @@ export class Scene extends PHASER.Scene {
 		 */
 		this.player1 = this.physics.add.sprite(16 * 64, 7 * 64, "character", 0);
 		this.player1.setScale(1.5);
+		this.player1.setSize(this.player1.width - 20, this.player1.height - 10);
 		this.player1.setCollideWorldBounds(true);
+
 		this.player2 = this.physics.add.sprite(18 * 64, 7 * 64, "character", 10);
 		this.player2.setScale(1.5);
+		this.player2.setSize(this.player2.width - 20, this.player2.height - 10);
 		this.player2.setCollideWorldBounds(true);
 
 		this.createPlayerAnims();
@@ -76,18 +81,27 @@ export class Scene extends PHASER.Scene {
 
 		this.physics.add.collider(this.player1, layerGoals);
 		this.physics.add.collider(this.player2, layerGoals);
-		this.playerBallOverlap = this.physics.add.overlap(this.player1, this.ball, () => {
-			this.playerHasBall = true;
-			this.playerBallOverlap!.active = false;
+		this.playerBallOverlap1 = this.physics.add.overlap(this.player1, this.ball, () => {
+			this.playerHasBall1 = true;
+			this.playerHasBall2 = false;
+			this.playerBallOverlap1!.active = false;
+			this.playerBallOverlap2!.active = false;
+		});
+		this.playerBallOverlap2 = this.physics.add.overlap(this.player2, this.ball, () => {
+			this.playerHasBall1 = false;
+			this.playerHasBall2 = true;
+			this.playerBallOverlap1!.active = false;
+			this.playerBallOverlap2!.active = false;
 		});
 		this.physics.add.collider(layerGoals, this.ball);
 
 		this.camera = this.cameras.main;
 		this.camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 		this.camera.startFollow(this.player1);
+		this.camera.setRoundPixels(true);
 
 		this.keyboard = this.input.keyboard.createCursorKeys();
-		this.shoot = this.input.keyboard.addKey(
+		this.keyShoot = this.input.keyboard.addKey(
 			Phaser.Input.Keyboard.KeyCodes.SPACE,
 		);
 
@@ -137,21 +151,24 @@ export class Scene extends PHASER.Scene {
 			this.player1.setVelocityY(-velocity);
 		}
 
-		if (this.playerHasBall) {
-			this.ball.setPosition(this.player1.x, this.player1.y + 32);
+		if (this.playerHasBall1) {
+			this.updateBallPosition(this.player1);
+		}
+		if (this.playerHasBall2) {
+			this.updateBallPosition(this.player2);
 		}
 
-		if (this.playerHasBall && this.shoot.isDown) {
+		if (this.playerHasBall1 && this.keyShoot.isDown) {
 			this.ball.setAcceleration(600, 0);
 		}
 
-		if (this.playerHasBall && !this.physics.overlap(this.player1, this.ball)) {
-			this.playerHasBall = false;
-			this.playerBallOverlap!.active = true;
-		}
+		/*if (this.playerHasBall1 && !this.physics.overlap(this.player1, this.ball)) {
+			this.playerHasBall1 = false;
+			this.playerBallOverlap1!.active = true;
+		}*/
 
 		this.debugText?.setText(
-			`Player position: ${Math.ceil(this.player1.x / 64)}, ${Math.ceil(this.player1.y / 64)}`
+			`Player overlaps ball: ${this.physics.overlap(this.player1, this.ball)}`
 		);
 	}
 	createDatGUI() {
@@ -188,40 +205,19 @@ export class Scene extends PHASER.Scene {
 			1,
 			0.05,
 		);
-		this.createVectorGui(
-			folderBall,
-			"gravity",
-			this.ball.body.gravity,
-			-600,
-			600,
-			10,
+		this.createVectorGui(folderBall, "gravity", this.ball.body.gravity,
+			-600, 600, 10
 		);
-		this.createVectorGui(
-			folderBall,
-			"maxVelocity",
-			this.ball.body.maxVelocity,
-			0,
-			10000,
-			100,
+		this.createVectorGui(folderBall, "maxVelocity", this.ball.body.maxVelocity,
+			0, 10000, 100
 		);
-		this.createVectorGui(
-			folderBall,
-			"velocity",
-			this.ball.body.velocity,
-			-600,
-			600,
-			10,
+		this.createVectorGui(folderBall, "velocity", this.ball.body.velocity,
+			-600, 600, 10
 		);
 	}
 
-	createVectorGui(
-		folder: dat.GUI,
-		name: string,
-		vector: PHASER.Math.Vector2,
-		min: number,
-		max: number,
-		step: number,
-	) {
+	createVectorGui(folder: dat.GUI, name: string, vector: PHASER.Math.Vector2,
+					min: number, max: number, step: number) {
 		const subFolder = folder.addFolder(name);
 		subFolder.add(vector, "x", min, max, step);
 		subFolder.add(vector, "y", min, max, step);
@@ -304,11 +300,21 @@ export class Scene extends PHASER.Scene {
 	/* Initializes a physics body and its properties. */
 	initializeBall() {
 		this.ball = this.physics.add.sprite(16 * 64 - 10, 7 * 64, "ball", 0)
-			.setScale(0.2);
+			.setScale(0.13);
 		this.ball.body.setFriction(1, 1);
 		this.ball.body.setBounce(0.5, 0.5);
 		this.ball.body.setCollideWorldBounds(true);
 		this.ball.body.setCircle(117);
 		this.ball.body.debugShowVelocity = true;
+	}
+
+	updateBallPosition(player: PHASER.Types.Physics.Arcade.SpriteWithDynamicBody) {
+		const moveVector = player.body.velocity.normalize();
+		this.ball.x = player.x + (32 * moveVector.x);
+		this.ball.y = player.y + (64 * moveVector.y);
+	}
+
+	shoot(player: PHASER.Types.Physics.Arcade.SpriteWithDynamicBody) {
+		// TODO : Implement logic.
 	}
 }
