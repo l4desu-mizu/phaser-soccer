@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    /*"moduleResolution": "Node",*/
+    "moduleResolution": "Node",
     "removeComments": true,
     "sourceMap": true,
     "outDir": "./out",
