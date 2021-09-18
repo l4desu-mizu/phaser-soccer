@@ -1,0 +1,42 @@
+name: RunTests
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: ['12']
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+
+    - uses: actions/cache@v1
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install npm dependencies
+      run: |
+        npm install
+
+    - name: Build frontend
+      run: |
+        npm run build
+
+    - name: Publish to Github Pages
+      if: github.ref == 'refs/heads/main'
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      with:
+        ACCESS_TOKEN: ${{ secrets.GITHUB_PAGES_TOKEN }}
+        BASE_BRANCH: main           # The branch the action should deploy from.
+        BRANCH: gh-pages           # The branch the action should deploy to.
+        FOLDER: dist           # The folder the action should deploy.
