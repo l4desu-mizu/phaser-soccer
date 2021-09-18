@@ -1,11 +1,11 @@
 {
-  "name": "phaser3-skeleton",
+  "name": "phaser-soccer",
   "version": "1.0.0",
   "description": "An application skeleton for 2D Game development",
   "main": "main.js",
   "private": "true",
   "engines": {
-    "node": ">=0.12"
+    "node": ">=0.14"
   },
   "scripts": {
     "prebuild": "tsc -p ./tsconfig.json",
