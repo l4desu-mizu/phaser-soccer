@@ -13,7 +13,7 @@ export class Ball {
 
     public updatePosition(){
         if(this.owner){
-            let pos = this.owner.position();
+            let pos = this.owner.ballJugglePosition();
             this.sprite.x = pos.x;
             this.sprite.y = pos.y;
         }
