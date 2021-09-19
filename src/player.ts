@@ -1,31 +1,60 @@
 import * as PHASER from "phaser";
 
+const enum PlayerAnimations{
+    right = "walk_right1",
+    left = "walk_left1",
+    up = "walk_up1",
+    down = "walk_down1",
+    stop = "walk_stop1",
+}
+
+/**
+ * Returns an animation for a given direction.
+ * direction: PHASER.Math.Vector2
+ * retrun: PlayerAnimations
+*/
+function animationFor(direction: PHASER.Math.Vector2) {
+    let xDeflection = Math.abs(direction.x);
+    let yDeflection = Math.abs(direction.y);
+    if (xDeflection>yDeflection){
+        if(direction.x > 0){
+            return PlayerAnimations.right;
+        }
+        else if(direction.x < 0){
+            return PlayerAnimations.left;
+        }
+    }else if(xDeflection<yDeflection){
+        if(direction.y < 0){
+            return PlayerAnimations.up;
+        }
+        else if(direction.y > 0){
+            return PlayerAnimations.down;
+        }
+    }
+    return PlayerAnimations.stop;
+}
+
 export class Player {
-    private readonly speed: number = 300;
+    private readonly speed: number = 20;
     public constructor(public sprite: PHASER.Types.Physics.Arcade.SpriteWithDynamicBody) {
     }
 
     public move(direction: PHASER.Math.Vector2){
-        let normalized = direction.normalize().scale(this.speed);
-        this.sprite.setVelocity(normalized.x, normalized.y);
-        this.updateSprite(normalized);
+        let speedDirection = direction.scale(this.speed);
+        this.updateSpriteAnimation(speedDirection);
+        this.sprite.setVelocity(speedDirection.x, speedDirection.y);
     }
 
-    private updateSprite(normalized: PHASER.Math.Vector2){
-        if (normalized.x>normalized.y){
-            if(normalized.x > 0){
-                this.sprite.play("walk_right1")
-            }
-            else if(normalized.x < 0){
-                this.sprite.play("walk_left1")
-            }
-        }else if(normalized.y<normalized.x){
-            if(normalized.y > 0){
-                this.sprite.play("walk_up1")
-            }
-            else if(normalized.y < 0){
-                this.sprite.play("walk_down1")
-            }
+    private updateSpriteAnimation(direction: PHASER.Math.Vector2){
+        if(direction.length() <= 0){
+            this.sprite.stop();
+        }
+
+        let currentAnimation = this.sprite.anims.getName();
+        let newAnimation = animationFor(direction);;
+
+        if(currentAnimation!=newAnimation){
+            this.sprite.play(newAnimation);
         }
     }
 

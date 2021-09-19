@@ -67,7 +67,8 @@ export class Scene extends PHASER.Scene {
 		 *  Create player objects and configure layer collision behaviour.
 		 */
 		for(let i=0;i<2;i++){
-			let newPlayerPhysics = this.physics.add.sprite(16 * 64, 7 * 64, "character", i*10);
+			let xOffset = 50*i;
+			let newPlayerPhysics = this.physics.add.sprite(xOffset + 16 * 64, 7 * 64, "character", i*10);
 			let newPlayer = new Player(newPlayerPhysics)
 			newPlayerPhysics.setScale(1.5);
 			newPlayerPhysics.setSize(newPlayerPhysics.width - 20, newPlayerPhysics.height - 10);
@@ -99,31 +100,28 @@ export class Scene extends PHASER.Scene {
 	 * @param time - Overall time in ms since game started.
 	 * @param delta - Time in ms since last update call.
 	 */
-	public update(_time: number, _delta: number) {
-
+	public update(_time: number, delta: number) {
 		let xMovement = Number(this.keyboard.right.isDown) - Number(this.keyboard.left.isDown);
-		let yMovement = Number(this.keyboard.up.isDown) - Number(this.keyboard.down.isDown);
-		let direction = new PHASER.Math.Vector2(xMovement, yMovement);
-		console.log(direction);
+		let yMovement = Number(this.keyboard.down.isDown) - Number(this.keyboard.up.isDown);
+		let direction = new PHASER.Math.Vector2(xMovement, yMovement).normalize().scale(delta);
+
 		this.players[0].move(direction);
 
 		this.ball.updatePosition()
-
 	}
+
 	createDatGUI() {
-		console.log("Creating DAT Gui");
 		const folderPlayer = this.dat.addFolder("Player");
 		const folderBall = this.dat.addFolder("Ball");
 
-
-		for(let player in this.players){
-			folderPlayer.add(player, "x", 0, 2000, 1);
-			folderPlayer.add(player, "y", 0, 2000, 1);
+		for(let player of this.players){
+			folderPlayer.add(player.sprite, "x", 0, 2000, 1);
+			folderPlayer.add(player.sprite, "y", 0, 2000, 1);
 		}
 
-		folderBall.add(this.ball, "x", 0, 3000, 1);
-		folderBall.add(this.ball, "y", 0, 3000, 1);
-		folderBall.add(this.ball, "scale", 0.0, 3.0, 0.01);
+		folderBall.add(this.ball.sprite, "x", 0, 3000, 1);
+		folderBall.add(this.ball.sprite, "y", 0, 3000, 1);
+		folderBall.add(this.ball.sprite, "scale", 0.0, 3.0, 0.01);
 		this.createVectorGui(
 			folderBall, "Acceleration", this.ball.sprite.body.acceleration,
 			-600, 600, 10,
@@ -242,7 +240,7 @@ export class Scene extends PHASER.Scene {
 
 	/* Initializes a physics body and its properties. */
 	initializeBall() {
-		let newBall = this.physics.add.sprite(16 * 64 - 10, 7 * 64, "ball", 0)
+		let newBall = this.physics.add.sprite(-50 + 16 * 64 - 10, 7 * 64, "ball", 0)
 			.setScale(0.13);
 		newBall.body.setFriction(1, 1);
 		newBall.body.setBounce(0.5, 0.5);
@@ -251,12 +249,6 @@ export class Scene extends PHASER.Scene {
 		newBall.body.debugShowVelocity = true;
 		this.ball = new Ball(newBall);
 	}
-
-	/*updateBallPosition(player: PHASER.Types.Physics.Arcade.SpriteWithDynamicBody) {
-		const moveVector = player.body.velocity.normalize();
-		this.ball.x = player.x + (32 * moveVector.x);
-		this.ball.y = player.y + (64 * moveVector.y);
-	}*/
 
 	shoot(player: PHASER.Types.Physics.Arcade.SpriteWithDynamicBody) {
 		// TODO : Implement logic.
