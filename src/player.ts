@@ -14,25 +14,22 @@ const enum PlayerAnimations{
  * retrun: PlayerAnimations
 */
 function animationFor(direction: PHASER.Math.Vector2) {
-    let xDeflection = Math.abs(direction.x);
-    let yDeflection = Math.abs(direction.y);
-    if (xDeflection>yDeflection){
-        if(direction.x > 0){
-            return PlayerAnimations.right;
-        }
-        else if(direction.x < 0){
-            return PlayerAnimations.left;
-        }
-    }else if(xDeflection<yDeflection){
-        if(direction.y < 0){
-            return PlayerAnimations.up;
-        }
-        else if(direction.y > 0){
-            return PlayerAnimations.down;
-        }
+    if(direction.x > 0){
+        return PlayerAnimations.right;
     }
+    else if(direction.x < 0){
+        return PlayerAnimations.left;
+    }
+    if(direction.y < 0){
+        return PlayerAnimations.up;
+    }
+    else if(direction.y > 0){
+        return PlayerAnimations.down;
+    }
+
     return PlayerAnimations.stop;
 }
+
 
 export class Player {
     private readonly speed: number = 20;
@@ -51,7 +48,7 @@ export class Player {
         }
 
         let currentAnimation = this.sprite.anims.getName();
-        let newAnimation = animationFor(direction);;
+        let newAnimation = animationFor(direction);
 
         if(currentAnimation!=newAnimation){
             this.sprite.play(newAnimation);
